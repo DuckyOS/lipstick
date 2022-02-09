@@ -68,6 +68,7 @@ signals:
 
 
     void pulseConnectFailed();
+    void defaultSourceIndexChanged();
 
 public slots:
     /*!
@@ -83,6 +84,10 @@ public slots:
      */
     void setVolume(int volume);
 
+private slots:
+    //! Follow PulseAudio visibility in sessionbus
+    void pulseRegistered(const QString &service);
+    void pulseUnregistered(const QString &service);
 
 private:
     //! Opens connection to PulseAudio daemon.
@@ -94,6 +99,10 @@ private:
      * \param currentStep The current volume step
      * \param stepCount Number of volume steps
      */
+    void setSteps(quint32 currentStep, quint32 stepCount);
+
+    //! Registers a signal handler to listen to the PulseAudio MainVolume1 StepsUpdated signal
+    void addSignalMatch();
     Q_DISABLE_COPY(PulseAudioControl)
 
 #ifdef UNIT_TEST
