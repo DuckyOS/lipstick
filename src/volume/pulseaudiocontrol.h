@@ -28,8 +28,6 @@
 class PulseAudioControl : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString defaultSinkName READ defaultSinkName NOTIFY defaultSinkNameChanged)
-    Q_PROPERTY(QString defaultSourceName READ defaultSourceName NOTIFY defaultSourceNameChanged)
 
 public:
     //! Construct a PulseAudioControl instance
@@ -43,9 +41,6 @@ public:
 
     int paVolume2Percent(pa_volume_t vol);
     pa_volume_t percent2PaVolume(int percent);
-
-    QString defaultSinkName() {return  m_defaultSinkName;}
-    QString defaultSourceName() {return m_defaultSourceName;}
 
 signals:
     /*!
@@ -89,9 +84,6 @@ signals:
     void sinkInputAdded(int index);
     void sinkInputRemoved(int index);
 
-    void defaultSinkNameChanged();
-    void defaultSourceNameChanged();
-
 public slots:
     /*!
      * Queries the PulseAudio daemon for the volume levels (current and maximum).
@@ -131,15 +123,14 @@ private:
 
     static void setVolumeCallBack(pa_context *, int success, void *);
 
-    void setupDefaultSink();
-    static void setupDefaultSinkCallBack(pa_context *, const pa_sink_info *i, int eol, void *userdata);
-
     pa_context* m_paContext;
     pa_mainloop_api* m_paAPI;
+    void *userdata;
 
     QString m_defaultSinkName;
     QString m_defaultSourceName;
-    int defaultSinkChannels;
+
+    pa_sink_info m_defaultSink;
 
     QList<pa_sink_info> m_sinksOutput;
     QList<pa_sink_input_info> m_sinksInput;
