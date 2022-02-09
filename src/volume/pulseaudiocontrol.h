@@ -1,7 +1,6 @@
 /***************************************************************************
 **
 ** Copyright (c) 2012 Jolla Ltd.
-** Copyright (c) 2021 Chupligin Sregey (NeoChapay) <neochapay@gmail.com>
 **
 ** This file is part of lipstick.
 **
@@ -18,7 +17,6 @@
 
 #include <pulse/pulseaudio.h>
 
-#include <QMutex>
 #include <QObject>
 /*!
  * \class PulseAudioControl
@@ -35,12 +33,6 @@ public:
 
     //! Destroys the PulseAudioControl instance
     virtual ~PulseAudioControl();
-
-    pa_context* getContext() {return m_paContext;}
-    static PulseAudioControl &instance();
-
-    int paVolume2Percent(pa_volume_t vol);
-    pa_volume_t percent2PaVolume(int percent);
 
 signals:
     /*!
@@ -77,13 +69,6 @@ signals:
 
     void pulseConnectFailed();
 
-    /*!
-     * Pulseaudio Signals for models
-    */
-
-    void sinkInputAdded(int index);
-    void sinkInputRemoved(int index);
-
 public slots:
     /*!
      * Queries the PulseAudio daemon for the volume levels (current and maximum).
@@ -111,6 +96,12 @@ private:
      */
     Q_DISABLE_COPY(PulseAudioControl)
 
+#ifdef UNIT_TEST
+    friend class Ut_PulseAudioControl;
+#endif
+    int paVolume2Percent(pa_volume_t vol);
+    pa_volume_t percent2PaVolume(int percent);
+
     static void stateCallBack(pa_context *context, void *userdata);
     static void subscribeCallBack(pa_context *context, pa_subscription_event_type_t t, uint32_t index, void *userdata);
     static void clientCallback(pa_context *, const pa_client_info *i, int eol, void *userdata);
@@ -134,8 +125,6 @@ private:
 
     QList<pa_sink_info> m_sinksOutput;
     QList<pa_sink_input_info> m_sinksInput;
-
-    QMutex lock;
 };
 
 #endif

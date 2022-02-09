@@ -35,7 +35,7 @@
 VolumeControl::VolumeControl(QObject *parent) :
     QObject(parent),
     m_window(0),
-    m_pulseAudioControl(),
+    m_pulseAudioControl(new PulseAudioControl(this)),
     m_hwKeysEnabled(false),
     m_volume(0),
     m_maximumVolume(0),
@@ -46,8 +46,6 @@ VolumeControl::VolumeControl(QObject *parent) :
     m_downPressed(false),
     m_mediaState(MediaStateUnknown)
 {
-    m_pulseAudioControl = &PulseAudioControl::instance();
-
     setWarningAcknowledged(false);
     connect(m_audioWarning, SIGNAL(valueChanged()), this, SIGNAL(restrictedVolumeChanged()));
     connect(this, SIGNAL(maximumVolumeChanged()), this, SIGNAL(restrictedVolumeChanged()));
