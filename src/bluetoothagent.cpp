@@ -21,12 +21,11 @@
 
 #include "bluetoothagent.h"
 
-#include <bluezqt/device.h>
-#include <bluezqt/initmanagerjob.h>
+# include <bluezqt/device.h>
+# include <bluezqt/initmanagerjob.h>
 
 BluetoothAgent::BluetoothAgent(QObject *parent)
     : BluezQt::Agent(parent)
-    , m_device(nullptr)
     , m_manager(new BluezQt::Manager(this))
     , m_usableAdapter(nullptr)
     , m_connected(false)
@@ -61,35 +60,6 @@ BluezQt::Agent::Capability BluetoothAgent::capability() const
     return DisplayYesNo;
 }
 
-void BluetoothAgent::requestPinCode(BluezQt::DevicePtr device, const BluezQt::Request<QString> &request)
-{
-    qDebug() << Q_FUNC_INFO;
-    m_device = device;
-    request.accept(QString());
-}
-
-void BluetoothAgent::displayPinCode(BluezQt::DevicePtr device, const QString &pinCode)
-{
-    qDebug() << Q_FUNC_INFO;
-    m_device = device;
-    emit showPinCode(pinCode);
-}
-
-void BluetoothAgent::requestPasskey(BluezQt::DevicePtr device, const BluezQt::Request<quint32> &request)
-{
-    qDebug() << Q_FUNC_INFO;
-    Q_UNUSED(request)
-    m_device = device;
-}
-
-void BluetoothAgent::displayPasskey(BluezQt::DevicePtr device, const QString &passkey, const QString &entered)
-{
-    qDebug() << Q_FUNC_INFO;
-    Q_UNUSED(passkey)
-    Q_UNUSED(entered)
-    m_device = device;
-}
-
 void BluetoothAgent::registerAgent()
 {
     BluezQt::PendingCall *call = m_manager->registerAgent(this);
@@ -103,59 +73,58 @@ void BluetoothAgent::registerAgent()
 
 void BluetoothAgent::pair(const QString &btMacAddress)
 {
-    m_device = m_manager->deviceForAddress(btMacAddress);
-    if(!m_device) {
+    BluezQt::DevicePtr device = m_manager->deviceForAddress(btMacAddress);
+    if(!device)
+    {
         qWarning() << "BT: Device not found";
         return;
     }
 
-    BluezQt::PendingCall *pcall = m_device->pair();
+    BluezQt::PendingCall *pcall = device->pair();
     pcall->setUserData(btMacAddress);
 
     connect(pcall, &BluezQt::PendingCall::finished,
-            this, &BluetoothAgent::pairFinished);
+            this, &BluetoothAgent::connectToDevice);
 }
 
 void BluetoothAgent::connectDevice(const QString &btMacAddress)
 {
-    m_device = m_manager->deviceForAddress(btMacAddress);
-    if(!m_device) {
+    BluezQt::DevicePtr device = m_manager->deviceForAddress(btMacAddress);
+    if(!device)
+    {
         qWarning() << "BT: Device not found";
         return;
     }
 
-    m_device->connectToDevice();
+    device->connectToDevice();
 }
 
-void BluetoothAgent::pairFinished(BluezQt::PendingCall *call)
+void BluetoothAgent::connectToDevice(BluezQt::PendingCall *call)
 {
     QString btMacAddress = call->userData().toString();
     if(!call->error()) {
-        m_device = m_manager->deviceForAddress(btMacAddress);
-        if(m_device) {
-            m_device->connectToDevice();
+        BluezQt::DevicePtr device = m_manager->deviceForAddress(btMacAddress);
+        if(device) {
+            device->connectToDevice();
         }
-    } else {
-        emit error(call->errorText());
     }
-
 }
 
 void BluetoothAgent::unPair(const QString &btMacAddress)
 {
-    m_device = m_manager->deviceForAddress(btMacAddress);
-    if(!m_device) {
+    BluezQt::DevicePtr device = m_manager->deviceForAddress(btMacAddress);
+    if(!device)
+    {
         return;
     }
 
-    m_usableAdapter->removeDevice(m_device);
+    m_usableAdapter->removeDevice(device);
 }
 
 void BluetoothAgent::usableAdapterChanged(BluezQt::AdapterPtr adapter)
 {
-    qDebug() << Q_FUNC_INFO;
-
-    if(adapter && m_usableAdapter != adapter) {
+    if(adapter && m_usableAdapter != adapter)
+    {
         m_usableAdapter = adapter;
 
         connect(m_usableAdapter.data(), &BluezQt::Adapter::deviceChanged,
@@ -171,37 +140,24 @@ void BluetoothAgent::usableAdapterChanged(BluezQt::AdapterPtr adapter)
 void BluetoothAgent::requestConfirmation(BluezQt::DevicePtr device, const QString &passkey, const BluezQt::Request<> &request)
 {
     Q_UNUSED(request);
-    m_device = device;
-    emit showRequiesDialog(m_device->address(),
-                           m_device->name(),
+
+    emit showRequiesDialog(device->address() ,
+                           device->name() ,
                            passkey);
-}
-
-void BluetoothAgent::requestAuthorization(BluezQt::DevicePtr device, const BluezQt::Request<> &request)
-{
-    qDebug() << Q_FUNC_INFO;
-    m_device = device;
-    request.accept();
-}
-
-void BluetoothAgent::authorizeService(BluezQt::DevicePtr device, const QString &uuid, const BluezQt::Request<> &request)
-{
-    qDebug() << Q_FUNC_INFO;
-    Q_UNUSED(uuid);
-    Q_UNUSED(request);
-    m_device = device;
 }
 
 void BluetoothAgent::initManagerJobResult(BluezQt::InitManagerJob *job)
 {
-    if (job->error()) {
+    if (job->error())
+    {
         qWarning() << "Error initializing Bluetooth manager:" << job->errorText();
     }
 }
 
 void BluetoothAgent::registerAgentFinished(BluezQt::PendingCall *call)
 {
-    if (call->error()) {
+    if (call->error())
+    {
         qWarning() << "BT: registerAgent() call failed:" << call->errorText();
         return;
     }
@@ -214,9 +170,9 @@ void BluetoothAgent::registerAgentFinished(BluezQt::PendingCall *call)
 
 void BluetoothAgent::requestDefaultAgentFinished(BluezQt::PendingCall *call)
 {
-    if (call->error()) {
+    if (call->error())
+    {
         qWarning() << "BT: requestDefaultAgent() call failed:" << call->errorText();
-        emit error(call->errorText());
     }
     qDebug() << "BT: bt agent registring as system" << objectPath().path();
     m_registerAgent = true;
@@ -225,15 +181,15 @@ void BluetoothAgent::requestDefaultAgentFinished(BluezQt::PendingCall *call)
 void BluetoothAgent::updateConnectedStatus()
 {
     bool isSomebodyConnected = false;
-    QList<QSharedPointer<BluezQt::Device>> devices = m_usableAdapter->devices();
-    for (const QSharedPointer<BluezQt::Device> &device : qAsConst(devices)) {
+    for (const auto &device : m_usableAdapter->devices()) {
         if (device->isConnected()) {
             isSomebodyConnected = true;
             break;
         }
     }
 
-    if(m_connected != isSomebodyConnected) {
+    if(m_connected != isSomebodyConnected)
+    {
         m_connected = isSomebodyConnected;
         emit connectedChanged();
     }
