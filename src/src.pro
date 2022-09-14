@@ -73,7 +73,6 @@ HEADERS += \
     3rdparty/synchronizelists.h \
     3rdparty/dbus-gmain/dbus-gmain.h \
     bluetooth/bluetoothagent.h \
-    bluetooth/bluetoothobexagent.h \
     notifications/notificationmanageradaptor.h \
     notifications/categorydefinitionstore.h \
     notifications/batterynotifier.h \
@@ -104,7 +103,6 @@ HEADERS += \
 SOURCES += \
     3rdparty/dbus-gmain/dbus-gmain.c \
     bluetooth/bluetoothagent.cpp \
-    bluetooth/bluetoothobexagent.cpp \
     homeapplication.cpp \
     homewindow.cpp \
     lipsticksettings.cpp \
