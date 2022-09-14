@@ -172,18 +172,9 @@ void BluetoothAgent::requestConfirmation(BluezQt::DevicePtr device, const QStrin
 {
     Q_UNUSED(request);
     m_device = device;
-
     emit showRequiesDialog(m_device->address(),
                            m_device->name(),
                            passkey);
-
-    connect(this, &BluetoothAgent::requestConfirmationAccept, this, [=] {
-       request.accept();
-    });
-
-    connect(this, &BluetoothAgent::requestConfirmationReject, this, [=] {
-        request.reject();
-    });
 }
 
 void BluetoothAgent::requestAuthorization(BluezQt::DevicePtr device, const BluezQt::Request<> &request)
