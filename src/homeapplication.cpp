@@ -44,7 +44,7 @@
 
 #include "volume/volumecontrol.h"
 #include "usbmodeselector.h"
-#include "bluetooth/bluetoothagent.h"
+#include "bluetoothagent.h"
 #include "localemanager.h"
 #include "shutdownscreen.h"
 #include "shutdownscreenadaptor.h"
